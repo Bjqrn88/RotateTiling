@@ -24,6 +24,7 @@ public class TileControl : MonoBehaviour {
 	private bool left = false;
 	private bool maxZoomLvlReached = false;
 	private float angle = 0;
+    private float rotateAngle = 0;
 
 	void Awake () {
 		zero.material.mainTexture = Resources.Load(zoomLvl+"/zoom0xx0") as Texture2D;
@@ -194,21 +195,29 @@ public class TileControl : MonoBehaviour {
 	}
 
 	public IEnumerator CoTurnLight() {
-		angle = Camera.main.transform.eulerAngles.y;
+        angle = Camera.main.transform.eulerAngles.y;
 		var rads = angle*((Mathf.PI*2)/360);
-		yield return null;
+        
+
+        /*yield return null;
 		Tiles.transform.localPosition = new Vector3(Mathf.Cos(rads)*10, 0, Mathf.Sin(rads)*10);
 		yield return null;
 		Tiles.transform.eulerAngles = new Vector3(0,Camera.main.transform.eulerAngles.y, 0);
+		yield return null;*/
+        Tiles.transform.position = new Vector3(((Mathf.Sin(rads) * 10)), 0, (Mathf.Cos(rads) * 10));
+        yield return null;
+        Tiles.transform.RotateAround(Tiles.transform.position, Tiles.transform.up, rotateAngle);
+        Tiles.transform.rotation = Quaternion.Slerp(rotateAngle, Camera.main.transform.eulerAngles.y, 0);
+        yield return null;
+
+        Controller.transform.position = new Vector3(((Mathf.Sin(rads) * 10)), 0, (Mathf.Cos(rads) * 10));
+        yield return null;
+		Controller.transform.RotateAround(Tiles.transform.position, Tiles.transform.up, rotateAngle);
 		yield return null;
 
-		Controller.transform.localPosition = new Vector3(Mathf.Cos(rads)*10, 0, Mathf.Sin(rads)*10);
-		yield return null;
-		Controller.transform.eulerAngles = new Vector3(0, Camera.main.transform.eulerAngles.y, 0);
-		yield return null;
-
-		LightSource.transform.eulerAngles = new Vector3(0,Camera.main.transform.eulerAngles.y,0);
-	}
+		LightSource.transform.RotateAround(Tiles.transform.position, Tiles.transform.up, rotateAngle);
+        rotateAngle = Camera.main.transform.eulerAngles.y;
+    }
 
 	IEnumerator doStuff(){
 		angle += 2;
