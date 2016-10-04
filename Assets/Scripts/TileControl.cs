@@ -24,7 +24,7 @@ public class TileControl : MonoBehaviour {
 	private bool left = false;
 	private bool maxZoomLvlReached = false;
 	private float angle = 0;
-    private float rotateAngle = 0;
+	private bool moved = true;
 
 	void Awake () {
 		zero.material.mainTexture = Resources.Load(zoomLvl+"/zoom0xx0") as Texture2D;
@@ -33,19 +33,6 @@ public class TileControl : MonoBehaviour {
 		three.material.mainTexture = Resources.Load(zoomLvl+"/zoom1xx1") as Texture2D;
 	}
 
-	/*void Update()
-	{
-		if (Input.GetKeyDown("r"))
-		{
-			StartCoroutine(doStuff());
-		}
-		angle += 2;
-		var rads = angle*((Mathf.PI*2)/360);
-		Tiles.transform.position = new Vector3(((Mathf.Sin(rads)*10)), 0, (Mathf.Cos(rads)*10));
-		Tiles.transform.RotateAround(Tiles.transform.position, Tiles.transform.up, 2);
-	}*/
-
-	// Call when zooming in 
 	public void ZoomIn() {
 		StartCoroutine(CoZoomIn());
 	}
@@ -77,8 +64,6 @@ public class TileControl : MonoBehaviour {
 			row = row + 1;
 			rowDown = false;
 		}
-		
-		Debug.Log("Done");
 	}
 
 	// Call when a tile is clicked, and call zoomIn(), if further zoom is possible
@@ -143,38 +128,42 @@ public class TileControl : MonoBehaviour {
 	}
 
 	public void ScrollUp() {
-		up = true;
-		--row;
-		GetTiles();
-		CheckBounds();
-		SetTiles();
+		if (moved) {
+			moved = false;
+			up = true;
+			--row;
+			GetTiles();
+			CheckBounds();
+			SetTiles();
+			moved = true;
+		}
 	}
 	
 	public void ScrollDown() {
-		++row;
-		GetTiles();
-		CheckBounds();
-		SetTiles();
+		if (moved) {
+			moved = false;
+			++row;
+			GetTiles();
+			CheckBounds();
+			SetTiles();
+			moved = true;
+		}
 	}
 
 	private void CheckBounds() {
 		if (zeroTex == null && left) {
 			column += 1;
-			Debug.Log("Column + 1");
 			left = false;
 			GetTiles();
 		} else if (zeroTex == null && up) {
 			row += 1;
-			Debug.Log("Row + 1");
 			up = false;
 			GetTiles();
 		} else if (oneTex == null) {
 			column -= 1;
-			Debug.Log("Column - 1");
 			GetTiles();
 		} else if (twoTex == null) {
 			row -= 1;
-			Debug.Log("Row - 1");
 			GetTiles();
 		}
 	}
@@ -191,41 +180,27 @@ public class TileControl : MonoBehaviour {
 	}
 
 	public void TurnLight() {
-		StartCoroutine(CoTurnLight());
+		if (moved) {
+			moved = false;
+			StartCoroutine(CoTurnLight());
+			moved = true;
+		}
 	}
 
 	public IEnumerator CoTurnLight() {
         angle = Camera.main.transform.eulerAngles.y;
 		var rads = angle*((Mathf.PI*2)/360);
-        
 
-        /*yield return null;
-		Tiles.transform.localPosition = new Vector3(Mathf.Cos(rads)*10, 0, Mathf.Sin(rads)*10);
-		yield return null;
-		Tiles.transform.eulerAngles = new Vector3(0,Camera.main.transform.eulerAngles.y, 0);
-		yield return null;*/
         Tiles.transform.position = new Vector3(((Mathf.Sin(rads) * 10)), 0, (Mathf.Cos(rads) * 10));
         yield return null;
-        Tiles.transform.RotateAround(Tiles.transform.position, Tiles.transform.up, rotateAngle);
-        Tiles.transform.rotation = Quaternion.Slerp(rotateAngle, Camera.main.transform.eulerAngles.y, 0);
-        yield return null;
+		Tiles.transform.eulerAngles = new Vector3(0,angle, 0);
+		yield return null;
 
         Controller.transform.position = new Vector3(((Mathf.Sin(rads) * 10)), 0, (Mathf.Cos(rads) * 10));
         yield return null;
-		Controller.transform.RotateAround(Tiles.transform.position, Tiles.transform.up, rotateAngle);
+		Controller.transform.eulerAngles = new Vector3(0,angle, 0);
 		yield return null;
 
-		LightSource.transform.RotateAround(Tiles.transform.position, Tiles.transform.up, rotateAngle);
-        rotateAngle = Camera.main.transform.eulerAngles.y;
+		LightSource.transform.eulerAngles = new Vector3(0,angle, 0);
     }
-
-	IEnumerator doStuff(){
-		angle += 2;
-		var rads = angle*((Mathf.PI*2)/360);
-		Debug.Log("Rotate: "+angle);
-		Tiles.transform.position = new Vector3(((Mathf.Sin(rads)*10)), 5, (Mathf.Cos(rads)*10));
-		yield return null;
-		Tiles.transform.RotateAround(Tiles.transform.position, Tiles.transform.up, 2);
-		yield return null;
-	}
 }
