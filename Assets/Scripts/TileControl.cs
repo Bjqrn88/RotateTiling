@@ -191,16 +191,19 @@ public class TileControl : MonoBehaviour {
         angle = Camera.main.transform.eulerAngles.y;
 		var rads = angle*((Mathf.PI*2)/360);
 
+		//Rotate Tiles
         Tiles.transform.position = new Vector3(((Mathf.Sin(rads) * 10)), 0, (Mathf.Cos(rads) * 10));
         yield return null;
 		Tiles.transform.eulerAngles = new Vector3(0,angle, 0);
 		yield return null;
 
+		//Rotate invisible controlpanels
         Controller.transform.position = new Vector3(((Mathf.Sin(rads) * 10)), 0, (Mathf.Cos(rads) * 10));
         yield return null;
 		Controller.transform.eulerAngles = new Vector3(0,angle, 0);
 		yield return null;
 
+		//Rotate lightsource
 		LightSource.transform.eulerAngles = new Vector3(0,angle, 0);
     }
 }
